@@ -1,0 +1,63 @@
+-- Omg Sound Script (Fixed)
+-- ID: 91556502224392
+
+local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
+
+local SOUND_ID = "rbxassetid://91556502224392"
+local localPlayer = Players.LocalPlayer
+local kills = 0
+
+-- Create sound
+local killSound = Instance.new("Sound", SoundService)
+killSound.SoundId = SOUND_ID
+killSound.Volume = 5
+killSound.Looped = false
+
+-- Stop sound when YOU die/respawn
+localPlayer.CharacterAdded:Connect(function(char)
+    local humanoid = char:WaitForChild("Humanoid", 5)
+    if humanoid then
+        humanoid.Died:Connect(function()
+            killSound:Stop()
+            print("🛑 You died - sound stopped")
+        end)
+    end
+end)
+
+local function playKillSound()
+    killSound:Stop()
+    killSound:Play()
+    kills = kills + 1
+    print("🔊 OMG SOUND PLAYED #" .. kills)
+end
+
+local function trackPlayer(player)
+    if player == localPlayer then return end
+
+    player.CharacterAdded:Connect(function(char)
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if not humanoid then return end
+
+        local fired = false  -- Prevent double/triple firing
+
+        humanoid.Died:Connect(function()
+            if not fired then
+                fired = true
+                playKillSound()
+                print("💀 [" .. kills .. "] " .. player.Name .. " died")
+            end
+        end)
+    end)
+end
+
+-- Track all players
+for _, player in Players:GetPlayers() do
+    trackPlayer(player)
+end
+
+Players.PlayerAdded:Connect(trackPlayer)
+
+print("✅ Omg Sound Loaded")
+print("🎵 ID: " .. SOUND_ID)
+print("👥 Tracking " .. #Players:GetPlayers() .. " players")
